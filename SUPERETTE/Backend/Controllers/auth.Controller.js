@@ -4,11 +4,11 @@ const sql = require('mssql');
 exports.login = async (req, res) => {
     const { nom, password, role } = req.body;
 
-    // 👉 LOG des informations reçues du frontend
-    console.log('Tentative de connexion :');
-    console.log('Nom:', nom);
-    console.log('Mot de passe:', password); 
-    console.log('Role:', role);
+    // // 👉 LOG des informations reçues du frontend
+    // console.log('Tentative de connexion :');
+    // console.log('Nom:', nom);
+    // console.log('Mot de passe:', password); 
+    // console.log('Role:', role);
 
     try {
         const pool = await sql.connect(dbConfig);

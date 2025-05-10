@@ -10,26 +10,38 @@ const LoginCaissier: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const response = await fetch('http://localhost:3001/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        nom,
-        password: motDePass,
-        role: 'caissier',
-      }),
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      setMessage('Connexion réussie');
-      navigate('/caissier');
-    } else {
-      setMessage(data.message);
+  
+    try {
+      const response = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          nom,
+          password: motDePass,
+          role: 'caissier',
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // ✅ Stocker les données utilisateur dans localStorage
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+  
+        setMessage('Connexion réussie');
+        navigate('/caissier');
+      } else {
+        setMessage(data.message || 'Erreur de connexion');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la connexion :', error);
+      setMessage('Erreur serveur');
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f4f6f7] p-4">

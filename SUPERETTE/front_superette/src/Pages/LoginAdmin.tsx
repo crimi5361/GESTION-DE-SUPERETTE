@@ -5,11 +5,12 @@ const LoginAdmin = () => {
   const [nom, setNom] = useState('');
   const [motDePass, setMotDePass] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // hook pour redirection
+  const navigate = useNavigate(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+try {
     const response = await fetch('http://localhost:3001/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,10 +24,18 @@ const LoginAdmin = () => {
 
     const data = await response.json();
     if (response.ok) {
-      setMessage('Connexion réussie');
-      navigate('/admin'); // ✅ redirection si ok
-    } else {
-      setMessage(data.message);
+      // ✅ Stocker les données utilisateur dans localStorage
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    setMessage('Connection reussie');
+    navigate('/admin');
+    }else{
+      setMessage(data.message || 'Erreur de connection');
+    }
+    } catch (error) {
+      console.error('Erreur lors de la connexion;', error);
+      setMessage('erreur server')
     }
   };
 

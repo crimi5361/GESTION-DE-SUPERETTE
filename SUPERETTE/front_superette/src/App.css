@@ -1,1 +1,6 @@
 @import "tailwindcss";
+/* Dans App.css */
+.ant-select-dropdown {
+    z-index: 9999 !important;
+  }
+  

@@ -4,6 +4,8 @@ const session = require('express-session');
 const cors = require('cors');
 const { connectDB } = require('./dbConfig');
 const authRoutes = require('./Routes/auth.routes');
+const dashStat = require('./Routes/dashboard.routes');
+const Stock_Produits = require ('./Routes/StockProduit.routes')
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,17 +27,29 @@ app.use(cors(corsOptions));
 
 // ✅ Middleware pour les sessions
 app.use(session({
-  secret: 'superette_secret_key', // 🛠️ Change cette clé secrète pour un projet réel
+  secret: 'superette_secret_key', 
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: false, // 🔒 Mets `true` si tu es en HTTPS (production)
+    secure: false, 
     maxAge: 1000 * 60 * 60 * 24 // 1 jour
   }
 }));
 
-// ✅ Routes d'authentification
+//=======================================================================================================//
+                                            // ✅ Routes d'authentification
+//=======================================================================================================//
+
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard',dashStat )
+app.use('/api/StockProduit', Stock_Produits )
+
+
+
+
+
+//=======================================================================================================//
+//=======================================================================================================//
 
 // ✅ Route test de base
 app.get('/', (req, res) => {
