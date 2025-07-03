@@ -1,6 +1,6 @@
 const sql = require('mssql');
 const dbConfig = require('../dbConfig');
-const { v4: uuidv4 } = require('uuid');
+// const { v4: uuidv4 } = require('uuid');
 
 // Récupérer tous les produits
 exports.getProduits = async (req, res) => {
@@ -47,40 +47,43 @@ exports.getHistorique = async (req, res) => {
 };
 
 
-//=======================================================================================================//
-                           // Fonction pour générer un code-barres unique
-//=======================================================================================================//
-// Génère un code-barres à partir du nom, du prix et de la catégorie
-const generateCodeBarre = (nom, prix_vente, categorie) => {
-  const uniquePart = uuidv4().split('-')[0]; // court et unique
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-
-  return `CB-${nom.substring(0, 3).toUpperCase()}-${Math.floor(prix_vente)}-${categorie.substring(0, 3).toUpperCase()}-${datePart}-${uniquePart}`;
-};
 
 // Ajouter un produit
 exports.addProduit = async (req, res) => {
   const {
     nom,
-    code_personnalise,
+    code_barre,
     prix_vente,
     prix_achat,
     stock,
     seuil_alerte,
     nom_categorie,
-    date_ajout,
+    date_ajout
   } = req.body;
-
-  // Génère le code-barres en utilisant le nom, prix_vente et catégorie
-  const code_barre = generateCodeBarre(nom, prix_vente, nom_categorie);
 
   try {
     const pool = await sql.connect(dbConfig);
 
+    // Générer un code_personnalise unique
+    let code_personnalise;
+    let exists = true;
+
+    while (exists) {
+      code_personnalise = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+
+      const check = await pool.request()
+        .input('code', sql.NVarChar, code_personnalise)
+        .query('SELECT COUNT(*) as count FROM Produits WHERE code_personnalise = @code');
+
+      if (check.recordset[0].count === 0) {
+        exists = false;
+      }
+    }
+
     await pool.request()
       .input('nom', sql.NVarChar, nom)
       .input('code_barre', sql.NVarChar, code_barre)
-      .input('code_personnalise', sql.NVarChar, code_personnalise || null)
+      .input('code_personnalise', sql.NVarChar, code_personnalise)
       .input('prix_vente', sql.Float, prix_vente)
       .input('prix_achat', sql.Float, prix_achat)
       .input('stock', sql.Int, stock)
@@ -94,13 +97,12 @@ exports.addProduit = async (req, res) => {
         (@nom, @code_barre, @code_personnalise, @prix_vente, @prix_achat, @stock, @seuil_alerte, @categorie, @date_ajout)
       `);
 
-    res.status(201).json({ message: 'Produit ajouté avec succès.', code_barre });
+    res.status(201).json({ message: 'Produit ajouté avec succès.', code_personnalise });
   } catch (err) {
     console.error('Erreur insertion produit :', err);
     res.status(500).json({ error: 'Erreur lors de l\'ajout du produit', details: err });
   }
 };
-
 
   // Modifier un produit
 exports.updateProduit = async (req, res) => {

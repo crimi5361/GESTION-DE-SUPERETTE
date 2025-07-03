@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Form,
-  Input,
-  InputNumber,
-  Button,
-  Row,
-  Col,
-  Select,
-  Card,
-  message,
-} from 'antd';
+import {Form,Input,InputNumber,Button,Row,Col,Select,Card,message} from 'antd';
 import Swal from 'sweetalert2';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 
@@ -31,13 +21,14 @@ const AddProduit: React.FC<AddProduitProps> = ({ onClose, onSuccess }) => {
 
   // 🔍 Démarrage du scanner quand le composant est monté
   useEffect(() => {
-    const scanner = new Html5QrcodeScanner('scanner', { fps: 10, qrbox: 250 });
+    const scanner = new Html5QrcodeScanner('scanner', { fps: 10, qrbox: 250 }, false);
+
 
     scanner.render(
       (decodedText) => {
         form.setFieldsValue({ code_barres: decodedText });
       },
-      (error) => {
+      () => {
         // Ignorer les erreurs
       }
     );
@@ -60,8 +51,19 @@ const AddProduit: React.FC<AddProduitProps> = ({ onClose, onSuccess }) => {
       });
   }, []);
 
+  interface ProduitFormValues {
+    code_barre: string;
+    nom: string;
+    nom_categorie: string;
+    stock: number;
+    seuil_alerte: number;
+    prix_achat: number;
+    prix_vente: number;
+  }
+  
+
   // Envoi des données au backend
-  const onFinish = (values: any) => {
+  const onFinish = (values: ProduitFormValues) => {
     const dataToSend = {
       ...values,
       date_ajout: new Date().toISOString(),
@@ -83,8 +85,12 @@ const AddProduit: React.FC<AddProduitProps> = ({ onClose, onSuccess }) => {
         if (onClose) onClose();
       })
       .catch((error) => {
-        console.error('Erreur lors de l\'ajout du produit:', error);
-        message.error('Impossible d\'ajouter le produit');
+          console.error("Erreur lors de l'ajout du produit:", error);
+          Swal.fire({
+            title: 'Erreur',
+            text: "Erreur lors de l'ajout du produit",
+            icon: 'error',
+          });
       });
   };
 
@@ -99,11 +105,11 @@ const AddProduit: React.FC<AddProduitProps> = ({ onClose, onSuccess }) => {
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="code_barres"
+              name="code_barre"
               label="Code-barres (scanné automatiquement)"
               rules={[{ required: true, message: 'Veuillez scanner le code-barres' }]}
             >
-              <Input placeholder="Scannez le produit..." autoFocus />
+              <Input placeholder="Scannez le produit..." autoFocus disabled />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -173,15 +179,6 @@ const AddProduit: React.FC<AddProduitProps> = ({ onClose, onSuccess }) => {
             </Form.Item>
           </Col>
         </Row>
-
-        <Row>
-          <Col span={24}>
-            <Form.Item name="code_personnalise" label="Code personnalisé">
-              <Input />
-            </Form.Item>
-          </Col>
-        </Row>
-
         <Form.Item>
           <Button type="primary" htmlType="submit" block>
             Enregistrer le produit

@@ -6,6 +6,7 @@ import AdminDashboard from './Pages/AdminDashboard/AdminDashboard';
 import CaissierDashboard from './Pages/CaissierDashboard/CaissierDashboard';
 import ProtectedRoute from './Components/ProtectedRoute';
 import "./App.css"
+import HistoriquePage from './Pages/AdminDashboard/pages/Achat_Appro/HistoriquePage';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
       <Route path="/" element={<Welcome />} />
       <Route path="/login-admin" element={<LoginAdmin />} />
       <Route path="/login-caissier" element={<LoginCaissier />} />
+      <Route path='/HistoriquePage' element={<HistoriquePage/>}/>
       <Route
         path="/admin/*"
         element={
